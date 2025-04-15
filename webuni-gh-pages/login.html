@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SkillSphere Login</title>
+    <style>
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #fff5f5;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+        }
+
+        .login-form {
+          background: white;
+          padding: 30px;
+          border-radius: 12px;
+          box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+          width: 400px;
+        }
+
+        .login-form h2 {
+          text-align: center;
+          margin-bottom: 20px;
+          color: #d60000;
+        }
+
+        .form-group {
+          margin-bottom: 15px;
+        }
+
+        .form-group label {
+          display: block;
+          margin-bottom: 5px;
+          font-weight: bold;
+          color: #444;
+        }
+
+        .form-group input {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #ff4d4d;
+          border-radius: 8px;
+        }
+
+        .btn {
+          display: block;
+          width: 100%;
+          padding: 10px;
+          background-color: #e60000;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+          margin-top: 10px;
+        }
+
+        .btn:hover {
+          background-color: #cc0000;
+        }
+
+        .btn-secondary {
+          background-color: transparent;
+          color: #e60000;
+          border: 2px solid #e60000;
+        }
+
+        .btn-secondary:hover {
+          background-color: #ffeaea;
+        }
+
+        .error {
+          color: red;
+          font-size: 14px;
+          margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="login-form">
+    <h2>Login</h2>
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+            <div class="error" id="emailError"></div>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+            <div class="error" id="passwordError"></div>
+        </div>
+        <button type="submit" class="btn">Login</button>
+        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Back</button>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById('loginForm');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const user = { email, password };
+
+      try {
+        const response = await fetch("http://localhost:8080/api/v1/auth/authenticate", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(user)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert("🎉 Login successful!");
+
+          const token = result.data.token;
+          const role = result.data.role;
+
+          console.log("Token:", token);
+          console.log("Role received from backend:", role);
+
+          // Store token and role in localStorage
+          localStorage.setItem("token", token);
+          localStorage.setItem("role", role);
+          localStorage.setItem("userId", result.data.id);
+
+          // Redirect based on role
+          if (role === "STUDENT") {
+            window.location.href = "studentDashbord.html";
+          } else if (role === "INSTRUCTOR") {
+            window.location.href = "insturtorDashbord.html";
+          } else if (role === "ADMIN") {
+            window.location.href = "adminDashboard.html";
+          } else {
+            alert("Unknown role. Cannot redirect.");
+            console.warn("Unhandled role:", role);
+          }
+
+          form.reset();
+        } else {
+          alert(`❌ Login Failed: ${result.message}`);
+        }
+      } catch (error) {
+        console.error("Request failed:", error);
+        alert("⚠️ An error occurred. Please try again.");
+      }
+    });
+</script>
+
+
+
+
+</body>
+</html>
