@@ -12,25 +12,25 @@ The system includes features for user authentication, course management, and an 
 ## 🖼️ Screenshots
 
 ### 🏠 Home / Hero Login Page  
-![Hero Login](screenshots/heroLoginSkillSphere.png)
+![Hero Login](scrennshot/heroLoginSkillSphere.png)
 
 ### 🔐 Login Page  
-![Login](screenshots/login.png)
+![Login](scrennshot/login.png)
 
 ### 📝 Register Page  
-![Register](screenshots/register.png)
+![Register](scrennshot/register.png)
 
 ### 🎓 Course Marketplace  
-![Course Marketplace](screenshots/coursemaketplace.png)
+![Course Marketplace](scrennshot/coursemaketplace.png)
 
 ### 👨‍🏫 Instructor Dashboard  
-![Instructor Dashboard](screenshots/instructordashbord.png)
+![Instructor Dashboard](scrennshot/instructordashbord.png)
 
 ### 🧑‍🎓 Student Dashboard  
-![Student Dashboard](screenshots/student%20dashbord.png)
+![Student Dashboard](scrennshot/student%20dashbord.png)
 
 ### ⚙️ Settings Page  
-![Settings](screenshots/seting.png)
+![Settings](scrennshot/seting.png)
 
 ---
 
