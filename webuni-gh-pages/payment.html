@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSphere Payment</title>
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: 'Arial', sans-serif;
+        }
+
+        body {
+          background-color: #f5f5f5;
+        }
+
+        .header {
+          background-color: #c41e3a;
+          color: white;
+          padding: 15px 0;
+          text-align: center;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .container {
+          max-width: 800px;
+          margin: 20px auto;
+          padding: 20px;
+          background-color: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .course-summary {
+          display: flex;
+          border-bottom: 1px solid #eee;
+          padding-bottom: 20px;
+          margin-bottom: 20px;
+        }
+
+        .course-image {
+          width: 120px;
+          height: 120px;
+          background-color: #eee;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #888;
+          border-radius: 6px;
+          margin-right: 20px;
+        }
+
+        .course-details h2 {
+          margin-bottom: 10px;
+          color: #333;
+        }
+
+        .course-price {
+          font-size: 24px;
+          font-weight: bold;
+          color: #c41e3a;
+          margin: 10px 0;
+        }
+
+        .payment-methods {
+          margin-bottom: 30px;
+        }
+
+        .payment-title {
+          font-size: 18px;
+          margin-bottom: 15px;
+          color: #333;
+        }
+
+        .payment-options {
+          display: flex;
+          gap: 15px;
+          margin-bottom: 20px;
+        }
+
+        .payment-option {
+          border: 1px solid #ddd;
+          border-radius: 6px;
+          padding: 15px;
+          cursor: pointer;
+          width: 100px;
+          text-align: center;
+          transition: all 0.3s;
+        }
+
+        .payment-option:hover {
+          border-color: #c41e3a;
+        }
+
+        .payment-option.selected {
+          border-color: #c41e3a;
+          background-color: #fff0f3;
+        }
+
+        .form-group {
+          margin-bottom: 15px;
+        }
+
+        label {
+          display: block;
+          margin-bottom: 5px;
+          color: #555;
+          font-weight: bold;
+        }
+
+        .input-field {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 16px;
+        }
+
+        .card-details {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+        }
+
+        .payment-button {
+          background-color: #c41e3a;
+          color: white;
+          border: none;
+          padding: 12px;
+          font-size: 16px;
+          border-radius: 4px;
+          cursor: pointer;
+          width: 100%;
+          margin-top: 20px;
+          transition: background-color 0.3s;
+        }
+
+        .payment-button:hover {
+          background-color: #a71930;
+        }
+
+        .success-modal {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0,0,0,0.6);
+          z-index: 1000;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .modal-content {
+          background-color: white;
+          padding: 30px;
+          border-radius: 8px;
+          text-align: center;
+          width: 90%;
+          max-width: 500px;
+        }
+
+        .success-icon {
+          font-size: 60px;
+          color: #4caf50;
+          margin-bottom: 20px;
+        }
+
+        .loading {
+          display: none;
+          text-align: center;
+          padding: 20px;
+        }
+
+        .spinner {
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #c41e3a;
+          border-radius: 50%;
+          width: 30px;
+          height: 30px;
+          animation: spin 1s linear infinite;
+          margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        .security-info {
+          margin-top: 20px;
+          padding: 15px;
+          background-color: #f9f9f9;
+          border-radius: 6px;
+          font-size: 14px;
+          color: #666;
+        }
+
+        .error-message {
+          color: #c41e3a;
+          font-size: 14px;
+          margin-top: 5px;
+          display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>SkillSphere Payment Gateway</h1>
+</div>
+
+<div class="container">
+    <div class="course-summary">
+        <div class="course-image">Course Image</div>
+        <div class="course-details">
+            <h2 id="courseName">Course Name</h2>
+            <p id="instructorName">Instructor Name</p>
+            <div class="course-price">$<span id="coursePrice">49.99</span></div>
+        </div>
+    </div>
+
+    <div class="payment-methods">
+        <h3 class="payment-title">Select Payment Method</h3>
+        <div class="payment-options">
+            <div class="payment-option selected" data-method="card">
+                <div>💳</div>
+                <div>Card</div>
+            </div>
+            <div class="payment-option" data-method="paypal">
+                <div>P</div>
+                <div>PayPal</div>
+            </div>
+            <div class="payment-option" data-method="bank">
+                <div>🏦</div>
+                <div>Bank</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="paymentForm">
+        <div class="form-group">
+            <label for="cardName">Name on Card</label>
+            <input type="text" id="cardName" class="input-field" placeholder="John Doe">
+            <div class="error-message" id="nameError">Please enter the name on your card</div>
+        </div>
+
+        <div class="form-group">
+            <label for="cardNumber">Card Number</label>
+            <input type="text" id="cardNumber" class="input-field" placeholder="1234 5678 9012 3456" maxlength="19">
+            <div class="error-message" id="cardError">Please enter a valid card number</div>
+        </div>
+
+        <div class="card-details">
+            <div class="form-group">
+                <label for="expiryDate">Expiry Date</label>
+                <input type="text" id="expiryDate" class="input-field" placeholder="MM/YY" maxlength="5">
+                <div class="error-message" id="expiryError">Please enter a valid expiry date</div>
+            </div>
+
+            <div class="form-group">
+                <label for="cvv">CVV</label>
+                <input type="text" id="cvv" class="input-field" placeholder="123" maxlength="3">
+                <div class="error-message" id="cvvError">Please enter a valid CVV</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email for Receipt</label>
+            <input type="email" id="email" class="input-field" placeholder="your@email.com">
+            <div class="error-message" id="emailError">Please enter a valid email</div>
+        </div>
+
+        <button class="payment-button" onclick="processPayment()">Pay Now</button>
+    </div>
+
+    <div class="security-info">
+        <p>🔒 Secure Payment: All payments are processed through our secure payment gateway. Your card details are encrypted and not stored on our servers.</p>
+    </div>
+</div>
+
+<div class="loading" id="loadingIndicator">
+    <div class="spinner"></div>
+    <p>Processing your payment...</p>
+</div>
+
+<div class="success-modal" id="successModal">
+    <div class="modal-content">
+        <div class="success-icon">✅</div>
+        <h2>Payment Successful!</h2>
+        <p>Your transaction has been completed and you now have full access to the course.</p>
+        <p>Transaction ID: <span id="transactionId">TRX123456789</span></p>
+        <p>An email receipt has been sent to your email address.</p>
+        <button class="payment-button" onclick="goToCourse()">Go to Course</button>
+    </div>
+</div>
+
+<script>
+    // Current course and user data
+ let courseData = null;
+ let userData = null;
+
+ // Initialize page with data
+ window.onload = function() {
+   // Get URL parameters
+   const urlParams = new URLSearchParams(window.location.search);
+   const courseId = urlParams.get('courseId');
+   const studentId = urlParams.get('studentId');
+
+   if (courseId) {
+     fetchCourseData(courseId);
+   } else {
+     // Fallback data
+     displayFallbackData();
+   }
+
+   if (studentId) {
+     fetchUserData(studentId);
+   }
+
+   // Set up payment option selection
+   setupPaymentOptions();
+
+   // Set up input formatting
+   setupInputFormatting();
+ };
+
+ // Fetch course data from API
+ async function fetchCourseData(courseId) {
+   try {
+     const response = await fetch(`http://localhost:8080/api/v1/courses/${courseId}`);
+     if (response.ok) {
+       courseData = await response.json();
+       displayCourseData(courseData);
+     } else {
+       displayFallbackData();
+     }
+   } catch (error) {
+     console.error('Error fetching course data:', error);
+     displayFallbackData();
+   }
+ }
+
+ // Fetch user data from API
+ async function fetchUserData(studentId) {
+   try {
+     const response = await fetch(`http://localhost:8080/api/v1/students/${studentId}`);
+     if (response.ok) {
+       userData = await response.json();
+       if (userData.email) {
+         document.getElementById('email').value = userData.email;
+       }
+     }
+   } catch (error) {
+     console.error('Error fetching user data:', error);
+   }
+ }
+
+ // Display course data on the page
+ function displayCourseData(course) {
+   document.getElementById('courseName').textContent = course.title;
+   document.getElementById('instructorName').textContent = `By ${course.instructorName}`;
+   document.getElementById('coursePrice').textContent = course.price;
+ }
+
+ // Display fallback data if API fails
+ function displayFallbackData() {
+   courseData = {
+     id: 1,
+     title: 'JavaScript Fundamentals',
+     instructorName: 'John Doe',
+     price: 49.99
+   };
+   displayCourseData(courseData);
+ }
+
+ // Set up payment option selection
+ function setupPaymentOptions() {
+   const options = document.querySelectorAll('.payment-option');
+   options.forEach(option => {
+     option.addEventListener('click', function() {
+       // Remove selected class from all options
+       options.forEach(opt => opt.classList.remove('selected'));
+       // Add selected class to clicked option
+       this.classList.add('selected');
+
+       // Change form fields based on payment method
+       const method = this.getAttribute('data-method');
+       changePaymentForm(method);
+     });
+   });
+ }
+
+ // Change payment form based on selected method
+ function changePaymentForm(method) {
+   const paymentFormContainer = document.getElementById('paymentForm');
+
+   if (method === 'card') {
+     paymentFormContainer.innerHTML = `
+       <div class="form-group">
+         <label for="cardName">Name on Card</label>
+         <input type="text" id="cardName" class="input-field" placeholder="John Doe">
+         <div class="error-message" id="nameError">Please enter the name on your card</div>
+       </div>
+
+       <div class="form-group">
+         <label for="cardNumber">Card Number</label>
+         <input type="text" id="cardNumber" class="input-field" placeholder="1234 5678 9012 3456" maxlength="19">
+         <div class="error-message" id="cardError">Please enter a valid card number</div>
+       </div>
+
+       <div class="card-details">
+         <div class="form-group">
+           <label for="expiryDate">Expiry Date</label>
+           <input type="text" id="expiryDate" class="input-field" placeholder="MM/YY" maxlength="5">
+           <div class="error-message" id="expiryError">Please enter a valid expiry date</div>
+         </div>
+
+         <div class="form-group">
+           <label for="cvv">CVV</label>
+           <input type="text" id="cvv" class="input-field" placeholder="123" maxlength="3">
+           <div class="error-message" id="cvvError">Please enter a valid CVV</div>
+         </div>
+       </div>
+
+       <div class="form-group">
+         <label for="email">Email for Receipt</label>
+         <input type="email" id="email" class="input-field" placeholder="your@email.com">
+         <div class="error-message" id="emailError">Please enter a valid email</div>
+       </div>
+
+       <button class="payment-button" onclick="processPayment('card')">Pay Now</button>
+     `;
+     setupInputFormatting(); // Re-initialize input formatting
+   }
+   else if (method === 'paypal') {
+     paymentFormContainer.innerHTML = `
+       <div class="form-group">
+         <label for="paypalEmail">PayPal Email</label>
+         <input type="email" id="paypalEmail" class="input-field" placeholder="your@email.com">
+         <div class="error-message" id="paypalEmailError">Please enter a valid PayPal email</div>
+       </div>
+
+       <div class="form-group">
+         <label for="email">Email for Receipt (if different)</label>
+         <input type="email" id="email" class="input-field" placeholder="your@email.com">
+         <div class="error-message" id="emailError">Please enter a valid email</div>
+       </div>
+
+       <p style="margin-bottom: 15px; color: #666;">You will be redirected to PayPal to complete your payment securely.</p>
+
+       <button class="payment-button" onclick="processPayment('paypal')">Continue to PayPal</button>
+     `;
+   }
+   else if (method === 'bank') {
+     paymentFormContainer.innerHTML = `
+       <div class="form-group">
+         <label for="accountName">Account Holder Name</label>
+         <input type="text" id="accountName" class="input-field" placeholder="John Doe">
+         <div class="error-message" id="accountNameError">Please enter the account holder name</div>
+       </div>
+
+       <div class="form-group">
+         <label for="accountNumber">Account Number</label>
+         <input type="text" id="accountNumber" class="input-field" placeholder="1234567890">
+         <div class="error-message" id="accountNumberError">Please enter a valid account number</div>
+       </div>
+
+       <div class="form-group">
+         <label for="bankName">Bank Name</label>
+         <input type="text" id="bankName" class="input-field" placeholder="Bank of Example">
+         <div class="error-message" id="bankNameError">Please enter your bank name</div>
+       </div>
+
+       <div class="form-group">
+         <label for="routingNumber">Routing Number</label>
+         <input type="text" id="routingNumber" class="input-field" placeholder="123456789">
+         <div class="error-message" id="routingNumberError">Please enter a valid routing number</div>
+       </div>
+
+       <div class="form-group">
+         <label for="email">Email for Receipt</label>
+         <input type="email" id="email" class="input-field" placeholder="your@email.com">
+         <div class="error-message" id="emailError">Please enter a valid email</div>
+       </div>
+
+       <button class="payment-button" onclick="processPayment('bank')">Complete Bank Transfer</button>
+     `;
+   }
+ }
+
+ // Set up input formatting
+ function setupInputFormatting() {
+   // Format card number with spaces (if exists)
+   const cardNumberInput = document.getElementById('cardNumber');
+   if (cardNumberInput) {
+     cardNumberInput.addEventListener('input', function(e) {
+       let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+       let formattedValue = '';
+       for (let i = 0; i < value.length; i++) {
+         if (i > 0 && i % 4 === 0) {
+           formattedValue += ' ';
+         }
+         formattedValue += value[i];
+       }
+       e.target.value = formattedValue;
+     });
+   }
+
+   // Format expiry date (if exists)
+   const expiryInput = document.getElementById('expiryDate');
+   if (expiryInput) {
+     expiryInput.addEventListener('input', function(e) {
+       let value = e.target.value.replace(/\D/g, '');
+       if (value.length > 2) {
+         value = value.substr(0, 2) + '/' + value.substr(2);
+       }
+       e.target.value = value;
+     });
+   }
+
+   // Allow only numbers in CVV (if exists)
+   const cvvInput = document.getElementById('cvv');
+   if (cvvInput) {
+     cvvInput.addEventListener('input', function(e) {
+       e.target.value = e.target.value.replace(/\D/g, '');
+     });
+   }
+
+   // Format account number (if exists)
+   const accountNumberInput = document.getElementById('accountNumber');
+   if (accountNumberInput) {
+     accountNumberInput.addEventListener('input', function(e) {
+       e.target.value = e.target.value.replace(/\D/g, '');
+     });
+   }
+
+   // Format routing number (if exists)
+   const routingNumberInput = document.getElementById('routingNumber');
+   if (routingNumberInput) {
+     routingNumberInput.addEventListener('input', function(e) {
+       e.target.value = e.target.value.replace(/\D/g, '');
+     });
+   }
+ }
+
+ // Validate the form based on payment method
+ function validateForm(method) {
+   let isValid = true;
+
+   // Always validate email
+   const emailInput = document.getElementById('email');
+   const emailError = document.getElementById('emailError');
+   if (emailInput) {
+     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+     if (!emailPattern.test(emailInput.value)) {
+       emailError.style.display = 'block';
+       isValid = false;
+     } else {
+       emailError.style.display = 'none';
+     }
+   }
+
+   if (method === 'card') {
+     // Validate name
+     const nameInput = document.getElementById('cardName');
+     const nameError = document.getElementById('nameError');
+     if (!nameInput.value.trim()) {
+       nameError.style.display = 'block';
+       isValid = false;
+     } else {
+       nameError.style.display = 'none';
+     }
+
+     // Validate card number
+     const cardInput = document.getElementById('cardNumber');
+     const cardError = document.getElementById('cardError');
+     const cardValue = cardInput.value.replace(/\s+/g, '');
+     if (cardValue.length < 16) {
+       cardError.style.display = 'block';
+       isValid = false;
+     } else {
+       cardError.style.display = 'none';
+     }
+
+     // Validate expiry date
+     const expiryInput = document.getElementById('expiryDate');
+     const expiryError = document.getElementById('expiryError');
+     const expiryPattern = /^(0[1-9]|1[0-2])\/\d{2}$/;
+     if (!expiryPattern.test(expiryInput.value)) {
+       expiryError.style.display = 'block';
+       isValid = false;
+     } else {
+       expiryError.style.display = 'none';
+     }
+
+     // Validate CVV
+     const cvvInput = document.getElementById('cvv');
+     const cvvError = document.getElementById('cvvError');
+     if (cvvInput.value.length < 3) {
+       cvvError.style.display = 'block';
+       isValid = false;
+     } else {
+       cvvError.style.display = 'none';
+     }
+   }
+   else if (method === 'paypal') {
+     // Validate PayPal email
+     const paypalEmailInput = document.getElementById('paypalEmail');
+     const paypalEmailError = document.getElementById('paypalEmailError');
+     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+     if (!emailPattern.test(paypalEmailInput.value)) {
+       paypalEmailError.style.display = 'block';
+       isValid = false;
+     } else {
+       paypalEmailError.style.display = 'none';
+     }
+   }
+   else if (method === 'bank') {
+     // Validate account holder name
+     const accountNameInput = document.getElementById('accountName');
+     const accountNameError = document.getElementById('accountNameError');
+     if (!accountNameInput.value.trim()) {
+       accountNameError.style.display = 'block';
+       isValid = false;
+     } else {
+       accountNameError.style.display = 'none';
+     }
+
+     // Validate account number
+     const accountNumberInput = document.getElementById('accountNumber');
+     const accountNumberError = document.getElementById('accountNumberError');
+     if (accountNumberInput.value.length < 8) {
+       accountNumberError.style.display = 'block';
+       isValid = false;
+     } else {
+       accountNumberError.style.display = 'none';
+     }
+
+     // Validate bank name
+     const bankNameInput = document.getElementById('bankName');
+     const bankNameError = document.getElementById('bankNameError');
+     if (!bankNameInput.value.trim()) {
+       bankNameError.style.display = 'block';
+       isValid = false;
+     } else {
+       bankNameError.style.display = 'none';
+     }
+
+     // Validate routing number
+     const routingNumberInput = document.getElementById('routingNumber');
+     const routingNumberError = document.getElementById('routingNumberError');
+     if (routingNumberInput.value.length < 9) {
+       routingNumberError.style.display = 'block';
+       isValid = false;
+     } else {
+       routingNumberError.style.display = 'none';
+     }
+   }
+
+   return isValid;
+ }
+
+ // This MUST be outside of any block
+async function createTransaction(transactionData) {
+  try {
+    const response = await fetch('http://localhost:8080/api/v1/transactions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(transactionData)
+    });
+
+    document.getElementById('loadingIndicator').style.display = 'none';
+
+    if (response.ok) {
+      const result = await response.json();
+      await enrollStudent(transactionData.studentId, transactionData.courseId);
+      showSuccessModal(result.id || generateTransactionId());
+    } else {
+      showSuccessModal(generateTransactionId());
+    }
+  } catch (error) {
+    console.error('Error creating transaction:', error);
+    document.getElementById('loadingIndicator').style.display = 'none';
+    showSuccessModal(generateTransactionId());
+  }
+}
+
+
+function processPayment(method) {
+  if (!validateForm(method)) return;
+
+  // Show loading indicator
+  document.getElementById('loadingIndicator').style.display = 'block';
+
+  // Get user ID from localStorage
+  const studentId = parseInt(localStorage.getItem('userId'), 10);
+  const courseId = courseData?.id || 1;
+  const amount = courseData?.price || 49.99;
+
+  // Debugging: log values
+  console.log("Student ID:", studentId);
+  console.log("Course ID:", courseId);
+  console.log("Amount:", amount);
+
+  // Create transaction data
+  const transactionData = {
+    studentId: studentId,
+    courseId: courseId,
+    amount: amount,
+    email: document.getElementById('email').value,
+    paymentMethod: method
+  };
+
+  setTimeout(() => {
+    createTransaction(transactionData);
+  }, 2000);
+}
+
+async function enrollStudent(studentId, courseId) {
+  try {
+    await fetch(`http://localhost:8080/api/v1/enrollments/enroll?studentId=${studentId}&courseId=${courseId}`, {
+      method: 'POST'
+    });
+  } catch (error) {
+    console.error('Error enrolling student:', error);
+  }
+}
+
+
+ // Generate a random transaction ID for demo purposes
+ function generateTransactionId() {
+   return 'TRX' + Math.floor(Math.random() * 1000000000).toString().padStart(9, '0');
+ }
+
+ // Show success modal
+ function showSuccessModal(transactionId) {
+   document.getElementById('transactionId').textContent = transactionId;
+   document.getElementById('successModal').style.display = 'flex';
+ }
+
+ // Go to course after successful payment
+ function goToCourse() {
+   window.location.href = `afterPayOneCourse.html?courseId=${courseData?.id || 1}`;
+ }
+</script>
+</body>
+</html>

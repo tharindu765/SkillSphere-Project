@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSphere Course Resources</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #c41e3a;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .course-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .course-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #c41e3a;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+
+        .course-info h2 {
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .course-info p {
+            color: #666;
+        }
+
+        .resources-title {
+            font-size: 20px;
+            margin: 20px 0 15px;
+            color: #c41e3a;
+        }
+
+        .resources-list {
+            list-style: none;
+        }
+
+        .resource-item {
+            background-color: #fff;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .resource-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .resource-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .resource-type {
+            display: inline-block;
+            background-color: #ffecef;
+            color: #c41e3a;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+
+        .resource-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .resource-link {
+            display: inline-block;
+            background-color: #c41e3a;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .resource-link:hover {
+            background-color: #a71930;
+        }
+
+        .no-resources {
+            color: #666;
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #c41e3a;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>SkillSphere Course Resources</h1>
+</div>
+
+<div class="container">
+    <div class="course-header">
+        <div class="course-icon">📚</div>
+        <div class="course-info">
+            <h2 id="courseName">Loading course...</h2>
+            <p id="instructorName"></p>
+        </div>
+    </div>
+
+    <h3 class="resources-title">Course Materials</h3>
+
+    <div id="loadingIndicator" class="loading">
+        <div class="spinner"></div>
+        <p>Loading resources...</p>
+    </div>
+
+    <ul id="resourcesList" class="resources-list">
+        <!-- Resources will be loaded here -->
+    </ul>
+</div>
+
+<script>
+    // Get course ID from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('courseId');
+
+    // Initialize page
+    window.onload = function() {
+        if (courseId) {
+            fetchCourseData(courseId);
+            fetchCourseMaterials(courseId);
+        } else {
+            document.getElementById('courseName').textContent = 'No course selected';
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('resourcesList').innerHTML = '<p class="no-resources">Please select a course to view resources</p>';
+        }
+    };
+
+    // Fetch course data
+    async function fetchCourseData(courseId) {
+        try {
+            const response = await fetch(`http://localhost:8080/api/v1/courses/${courseId}`);
+            if (response.ok) {
+                const courseData = await response.json();
+                document.getElementById('courseName').textContent = courseData.title;
+                document.getElementById('instructorName').textContent = `By ${courseData.instructorName}`;
+            } else {
+                document.getElementById('courseName').textContent = 'Course not found';
+            }
+        } catch (error) {
+            console.error('Error fetching course data:', error);
+            document.getElementById('courseName').textContent = 'Error loading course';
+        }
+    }
+
+    // Fetch course materials
+    async function fetchCourseMaterials(courseId) {
+        try {
+            const response = await fetch(`http://localhost:8080/api/v1/course-materials/course/${courseId}`);
+            document.getElementById('loadingIndicator').style.display = 'none';
+
+            if (response.ok) {
+                const materials = await response.json();
+                displayCourseMaterials(materials);
+            } else {
+                document.getElementById('resourcesList').innerHTML = '<p class="no-resources">Failed to load resources</p>';
+            }
+        } catch (error) {
+            console.error('Error fetching course materials:', error);
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('resourcesList').innerHTML = '<p class="no-resources">Error loading resources</p>';
+        }
+    }
+
+    // Display course materials
+    function displayCourseMaterials(materials) {
+        const resourcesList = document.getElementById('resourcesList');
+
+        if (materials.length === 0) {
+            resourcesList.innerHTML = '<p class="no-resources">No resources available for this course yet</p>';
+            return;
+        }
+
+        let htmlContent = '';
+
+        materials.forEach(material => {
+            htmlContent += `
+                <li class="resource-item">
+                    <div class="resource-title">${material.title}</div>
+                    <div class="resource-type">${getResourceTypeLabel(material.type)}</div>
+                    <div class="resource-description">${material.description || 'No description available'}</div>
+                    <a href="${material.contentUrl}" class="resource-link" target="_blank">Access Resource</a>
+                </li>
+            `;
+        });
+
+        resourcesList.innerHTML = htmlContent;
+    }
+
+    // Get user-friendly label for resource type
+    function getResourceTypeLabel(type) {
+        const types = {
+            'VIDEO': 'Video Lecture',
+            'PDF': 'PDF Document',
+            'DOCUMENT': 'Document',
+            'QUIZ': 'Quiz',
+            'ASSIGNMENT': 'Assignment',
+            'LINK': 'External Link',
+            'CODE': 'Code Sample'
+        };
+
+        return types[type] || type;
+    }
+</script>
+</body>
+</html>
