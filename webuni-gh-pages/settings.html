@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSphere - Settings</title>
+    <style>
+        :root {
+          --primary-color: #ff7070;
+          --primary-light: #ffb3b3;
+          --white: #ffffff;
+          --text: #333333;
+          --border: #dddddd;
+        }
+
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+          background-color: var(--white);
+          color: var(--text);
+        }
+
+        .container {
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+
+        header {
+          background-color: var(--primary-color);
+          color: var(--white);
+          padding: 15px 20px;
+          border-radius: 8px;
+          margin-bottom: 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .settings-section {
+          background-color: var(--white);
+          border-radius: 8px;
+          padding: 20px;
+          margin-bottom: 20px;
+          border: 1px solid var(--border);
+        }
+
+        h1, h2 {
+          margin-bottom: 15px;
+        }
+
+        .form-group {
+          margin-bottom: 15px;
+        }
+
+        label {
+          display: block;
+          margin-bottom: 5px;
+          font-weight: 500;
+        }
+
+        input, select {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid var(--border);
+          border-radius: 4px;
+          font-size: 14px;
+        }
+
+        button {
+          background-color: var(--primary-color);
+          color: var(--white);
+          border: none;
+          padding: 10px 15px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: 500;
+        }
+
+        button:hover {
+          background-color: var(--primary-light);
+        }
+
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 50px;
+          height: 24px;
+        }
+
+        .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          transition: .4s;
+          border-radius: 24px;
+        }
+
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 16px;
+          width: 16px;
+          left: 4px;
+          bottom: 4px;
+          background-color: white;
+          transition: .4s;
+          border-radius: 50%;
+        }
+
+        input:checked + .slider {
+          background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+          transform: translateX(26px);
+        }
+
+        .toggle-group {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .success-message {
+          background-color: var(--primary-light);
+          padding: 12px;
+          border-radius: 4px;
+          margin-top: 15px;
+          display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Settings</h1>
+        <div id="user-info">Welcome, User</div>
+    </header>
+
+    <div class="settings-section">
+        <h2>Profile Settings</h2>
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" placeholder="Your Name">
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="your.email@example.com">
+        </div>
+
+        <div class="form-group">
+            <label for="role">Role</label>
+            <select id="role" disabled>
+                <option value="student">Student</option>
+                <option value="instructor">Instructor</option>
+            </select>
+        </div>
+
+        <button id="update-profile">Save Changes</button>
+    </div>
+
+    <div class="settings-section">
+        <h2>Notification Settings</h2>
+
+        <div class="form-group toggle-group">
+            <span>Email Notifications</span>
+            <label class="switch">
+                <input type="checkbox" id="email-notifications" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="form-group toggle-group">
+            <span>Course Updates</span>
+            <label class="switch">
+                <input type="checkbox" id="course-updates" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="form-group toggle-group">
+            <span>New Messages</span>
+            <label class="switch">
+                <input type="checkbox" id="new-messages" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <button id="update-notifications">Save Preferences</button>
+    </div>
+
+    <div class="settings-section">
+        <h2>Password</h2>
+        <div class="form-group">
+            <label for="current-password">Current Password</label>
+            <input type="password" id="current-password">
+        </div>
+
+        <div class="form-group">
+            <label for="new-password">New Password</label>
+            <input type="password" id="new-password">
+        </div>
+
+        <div class="form-group">
+            <label for="confirm-password">Confirm New Password</label>
+            <input type="password" id="confirm-password">
+        </div>
+
+        <button id="update-password">Update Password</button>
+    </div>
+
+    <div class="success-message" id="success-message">
+        Settings saved successfully!
+    </div>
+</div>
+
+<script>
+    // Global variables
+  const API_BASE_URL = "http://localhost:8080/api/v1";
+  let userId, userRole, authToken;
+
+  // Get user info and setup event listeners
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get authentication data from localStorage
+    authToken = localStorage.getItem('token');
+    userId = localStorage.getItem('userId');
+    userRole = localStorage.getItem('role'); // Getting role from localStorage
+
+    if (!authToken || !userId) {
+      window.location.href = '/login.html'; // Redirect to login if not authenticated
+      return;
+    }
+
+    // Set up event listeners
+    document.getElementById('update-profile').addEventListener('click', updateProfile);
+    document.getElementById('update-notifications').addEventListener('click', updateNotifications);
+    document.getElementById('update-password').addEventListener('click', updatePassword);
+
+    // Fetch user data
+    fetchUserData();
+  });
+
+  function fetchUserData() {
+    let endpoint;
+
+    // Determine endpoint based on user role from localStorage
+    if (userRole === 'INSTRUCTOR') {
+      endpoint = `${API_BASE_URL}/instructors/${userId}`;
+    } else if (userRole === 'STUDENT') {
+      endpoint = `${API_BASE_URL}/students/${userId}`;
+    } else {
+      endpoint = `${API_BASE_URL}/users/email?email=${localStorage.getItem('email')}`;
+    }
+
+    fetch(endpoint, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      }
+    })
+    .then(response => {
+      if (!response.ok) throw new Error('Failed to fetch user data');
+      return response.json();
+    })
+    .then(userData => {
+      // Display user data in the form
+      document.getElementById('name').value = userData.name || userData.fullName;
+      document.getElementById('email').value = userData.email;
+      document.getElementById('role').value = userRole.toLowerCase();
+      document.getElementById('user-info').textContent = `Welcome, ${userData.name || userData.fullName}`;
+
+      // Notification settings would come from user preferences if available
+    })
+    .catch(error => {
+      console.error('Error fetching user data:', error);
+      alert('Failed to load user data. Please try again later.');
+    });
+  }function updateProfile() {
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+
+  if (!name || !email) {
+    alert('Please fill in all required fields');
+    return;
+  }
+
+  const userData = {
+    email: email,
+    name: name  // Make sure this matches the field name expected by UserDTO
+  };
+
+  // Always use the users endpoint for profile updates regardless of role
+  const endpoint = `${API_BASE_URL}/users/${userId}`;
+
+  fetch(endpoint, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${authToken}`
+    },
+    body: JSON.stringify(userData)
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to update profile');
+    }
+    return response.json();
+  })
+  .then(() => {
+    showSuccessMessage();
+  })
+  .catch(error => {
+    console.error('Error updating profile:', error);
+    alert('Failed to update profile. Please try again.');
+  });
+}
+  function updateNotifications() {
+    const emailNotifications = document.getElementById('email-notifications').checked;
+    const courseUpdates = document.getElementById('course-updates').checked;
+    const newMessages = document.getElementById('new-messages').checked;
+
+    const notificationSettings = {
+      emailNotifications: emailNotifications,
+      courseUpdates: courseUpdates,
+      newMessages: newMessages,
+      userId: userId
+    };
+
+    // Assuming you have a notifications endpoint
+    fetch(`${API_BASE_URL}/users/notifications`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: JSON.stringify(notificationSettings)
+    })
+    .then(response => {
+      if (!response.ok) throw new Error('Failed to update notification settings');
+      return response.json();
+    })
+    .then(() => {
+      showSuccessMessage();
+    })
+    .catch(error => {
+      console.error('Error updating notifications:', error);
+      alert('Failed to update notification settings. Please try again.');
+    });
+  }
+
+  function updatePassword() {
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+
+    if (newPassword !== confirmPassword) {
+      alert('New passwords do not match!');
+      return;
+    }
+
+    if (!currentPassword || !newPassword) {
+      alert('Please fill in all password fields');
+      return;
+    }
+
+    const passwordData = {
+      userId: userId,
+      currentPassword: currentPassword,
+      newPassword: newPassword
+    };
+
+    fetch(`${API_BASE_URL}/users/password`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: JSON.stringify(passwordData)
+    })
+    .then(response => {
+      if (!response.ok) throw new Error('Failed to update password');
+      return response.json();
+    })
+    .then(() => {
+      document.getElementById('current-password').value = '';
+      document.getElementById('new-password').value = '';
+      document.getElementById('confirm-password').value = '';
+      showSuccessMessage();
+    })
+    .catch(error => {
+      console.error('Error updating password:', error);
+      alert('Failed to update password. Please check your current password and try again.');
+    });
+  }
+
+  function showSuccessMessage() {
+    const successMessage = document.getElementById('success-message');
+    successMessage.style.display = 'block';
+
+    setTimeout(() => {
+      successMessage.style.display = 'none';
+    }, 3000);
+  }
+</script>
+</body>
+</html>

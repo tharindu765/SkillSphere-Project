@@ -114,6 +114,12 @@
             </select>
             <div class="error" id="roleError"></div>
         </div>
+        <div class="form-group" id="bioGroup" style="display: none;">
+            <label for="bio">Instructor Bio</label>
+            <textarea id="bio" name="bio" rows="4" placeholder="Tell us about yourself..."></textarea>
+            <div class="error" id="bioError"></div>
+        </div>
+
 
         <button type="submit" class="btn">Register</button>
         <button type="button" class="btn btn-secondary" onclick="window.history.back()">Back</button>
@@ -121,38 +127,76 @@
 </div>
 
 <script>
-    const form = document.getElementById('registrationForm');
+    document.addEventListener("DOMContentLoaded", () => {
+   const form = document.getElementById('registrationForm');
+   const roleSelect = document.getElementById('role');
+   const bioGroup = document.getElementById('bioGroup');
+   const bioInput = document.getElementById('bio');
 
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
+   // Show/hide bio input based on selected role
+   roleSelect.addEventListener('change', () => {
+     if (roleSelect.value === 'INSTRUCTOR') {
+       console.log("INSTRUCTOR role selected. Showing bio field.");
+       bioGroup.style.display = 'block';
+       bioInput.setAttribute('required', 'true');
+     } else {
+       console.log(`Role selected: ${roleSelect.value}. Hiding bio field.`);
+       bioGroup.style.display = 'none';
+       bioInput.removeAttribute('required');
+     }
+   });
 
-      const fullName = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const role = document.getElementById('role').value;
+   form.addEventListener('submit', async (event) => {
+     event.preventDefault();
 
-      const user = { email, password, fullName };
+     const fullName = document.getElementById('name').value.trim();
+     const email = document.getElementById('email').value.trim();
+     const password = document.getElementById('password').value.trim();
+     const role = roleSelect.value;
+     const bio = bioInput.value.trim();
 
-      try {
-        const response = await fetch(`http://localhost:8080/api/v1/users/register?role=${role}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(user)
-        });
+     let user = { email, password, fullName };
 
-        if (response.ok) {
-          alert("🎉 Registration successful!");
-          form.reset();
-        } else {
-          const errorData = await response.json();
-          console.error("Error:", errorData);
-          alert("❌ Registration failed. Please try again.");
-        }
-      } catch (error) {
-        console.error("Request failed:", error);
-        alert("⚠️ Network error. Try again later.");
-      }
-    });
+     if (role === 'INSTRUCTOR') {
+       if (!bio) {
+         alert("Please enter a bio for instructor registration.");
+         console.log("Bio is empty!");
+         return;
+       }
+       user.bio = bio;
+     }
+
+     console.log("Role:", role);
+     console.log("User payload:", user);
+
+     try {
+       const url = `http://localhost:8080/api/v1/users/register?role=${role}`;
+       console.log("Sending POST request to:", url);
+
+       const response = await fetch(url, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify(user)
+       });
+
+       if (response.ok) {
+         alert("🎉 Registration successful!");
+         console.log("Success response:", await response.json());
+         form.reset();
+         bioGroup.style.display = 'none';
+       } else {
+         const errorData = await response.json();
+         console.error("Server error response:", errorData);
+         alert("❌ Registration failed. Please try again.");
+       }
+     } catch (error) {
+       console.error("Fetch request failed:", error);
+       alert("⚠️ Network error. Try again later.");
+     }
+   });
+ });
+
 </script>
+
 </body>
 </html>
